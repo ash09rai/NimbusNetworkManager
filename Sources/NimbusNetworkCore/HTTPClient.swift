@@ -269,6 +269,9 @@ public actor HTTPClient {
     }
 
     private func decodeSuccess<T: Decodable>(data: Data, as type: T.Type, decoder: JSONDecoder) throws -> T {
+        if T.self == Data.self {
+            return data as! T
+        }
         if T.self == EmptyResponse.self, data.isEmpty {
             return EmptyResponse() as! T
         }

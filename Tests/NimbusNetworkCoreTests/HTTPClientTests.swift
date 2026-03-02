@@ -214,6 +214,20 @@ final class HTTPClientTests: XCTestCase {
         XCTAssertEqual(result.value, expected)
     }
 
+    func testRawDataResponseReturnsUnmodifiedPayload() async {
+        let payload = Data("{\"raw\":true}".utf8)
+        let session = MockHTTPSession(handlers: [{ request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (payload, response)
+        }])
+
+        let endpoint = TestEndpoint(baseURL: URL(string: "https://api.example.com")!, path: "raw", method: .get)
+        let client = HTTPClient(configuration: .init(session: session))
+
+        let result = await client.send(endpoint, response: Data.self)
+        XCTAssertEqual(result.value, payload)
+    }
+
     func testInvalidURLErrorMapping() async {
         let session = MockHTTPSession(handlers: [])
         let endpoint = TestEndpoint(baseURL: URL(string: "/relative-url")!, path: "users", method: .get)
